@@ -12,11 +12,16 @@ if (!expectedApiKey) {
 }
 
 const server = http.createServer((req, res) => {
+  const sourceIp = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
+  const timestamp = new Date().toISOString();
+
   if (req.headers["x-api-key"] === expectedApiKey) {
+    console.log(`[${timestamp}] ✓ Successful auth from ${sourceIp}`);
     res.writeHead(200);
     return res.end();
   }
 
+  console.log(`[${timestamp}] ✗ Failed auth from ${sourceIp}`);
   res.writeHead(401, { "content-type": "application/json" });
   res.end(JSON.stringify({ error: "unauthorized", status: 401 }));
 });
